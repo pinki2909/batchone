@@ -3,6 +3,7 @@ import AuthRoles from "../utils/authRoles";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import config from "../config/index";
 const userSchema = mongoose.Schema(
     {
         name:{
@@ -38,4 +39,21 @@ userSchema.pre("save", async function(next){
     this.password = await bcrypt.hash(this.password,10)
     next()
 })
+userSchema.mathods = {
+    comparePassword : async function(enteredPassword){
+        return await bcrypt.compare(enteredPassword,this.password) 
+    },
+    getjwtToken : function(){
+        return jwt.sign(
+            {
+                _id:this.id,
+                role : this.role
+            },
+            config.jwt_SECRET,
+            {
+               expiresIn : config.jwt_EXPIRY
+            }
+        )
+    }
+}
 export default moongoose.model("user" ,userSchema)
