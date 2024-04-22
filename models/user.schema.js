@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema(
     }
 );
 userSchema.pre("save", async function(next){
-    if(!this.modified("password"))return next();
+    if(!this.ismodified("password"))return next();
     this.password = await bcrypt.hash(this.password,10)
     next()
 })
@@ -54,6 +54,16 @@ userSchema.mathods = {
                expiresIn : config.jwt_EXPIRY
             }
         )
+    },
+    generateforgotPasswordToken : function(){
+        const forgotToken = crypto.randomBytes(10).toString('hex');
+        this.forgotPasswordToken = crypto
+        .createHash("sha256")
+        .update(forgotToken)
+        .digest("hex")
+        this.forgotPasswordExpiry = Date.now()+20 *60 *1000
+        return forgotToken;
     }
 }
+
 export default moongoose.model("user" ,userSchema)
