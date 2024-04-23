@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import AuthRoles from "../utils/authRoles";
 import jwt from "jsonwebtoken";
+import collectionSchema from "./collection.schema";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import config from "../config/index";
