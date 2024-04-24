@@ -131,3 +131,13 @@ export const resetPassword = asynchandler(async (req,res)=>{
 
 
 })
+export const getProfile = asynchandler(async(req,res)=>{
+    const{User}=req
+    if(!User){
+        throw new customerror("user not found",404)
+    }
+    res.status(200).json({
+        success : true,
+        User
+    })
+})

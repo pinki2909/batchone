@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 import user from  '../models/user.schema'
 import config from "../config/index.js"
 
-export const isLoggedIn = asynchandler(async(req,res,next)=>{
+export const isLoggedIn = asynchandler(async(req,_res,next)=>{
     let token;
     if(
         req.cookie.token ||
@@ -17,7 +17,7 @@ if(!token){
 }
 try {
     const decodedjwtPayload = jwt.verify(token,config.jwt_SECRET)
-    req.User = awit user.findById(decodedjwtPayload._id, "name email role")
+    req.User = await user.findById(decodedjwtPayload._id, "name email role")
     next()
     
 } catch (error) {
