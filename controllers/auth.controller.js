@@ -2,6 +2,7 @@ import express from 'express';
 import user from '../models/user.schema'
 import asynchandler from '../services/asynchandler';
 import customerror from '../utils/customerror';
+import mailHelper from '../utils/mailHelper';
 
 export const cookieOptions = {
     expires:new Date(Date.now()+3*24*60*60*1000),
@@ -68,3 +69,35 @@ export const logout = asynchandler(async(_req,res)=>{
         message:"Logged Out"
     })
 })
+export const forgotPassword = asynchandler(async (req,res)=>{
+    const {email} = req.body
+   
+    const User = await user.findOne({email})
+    if(!User){
+        throw new customerror('user not found',400)
+    }
+    const resetToken = user.generateForgotPasswordToken()
+    await user.save({validateBeforeSave: false})
+    const resetUrl = 
+    `${req.protocol}://${req.get("host")}/api/aut/password/reset/${resetToken}`
+    const text = `your password reset url is
+    \n\n${resetUrl}\n\n`
+    try {
+        await mailHelper({
+            email:User.email,
+            subject : "password reset email for website",
+            text :text,
+        })
+        res.status(200).json({
+            success:true,
+            message : `email send to ${user.email}`
+        })
+    } catch (error) {
+        User.forgotPasswordToken = undefined
+        User.forgotPasswordExpiry = undefined
+        await User.save({validateBeforeSave:false})
+        throw new customerror(err.message|| 'email sent failure',500)
+    }
+    
+        }
+    );
