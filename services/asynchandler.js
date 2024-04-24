@@ -1,4 +1,4 @@
-const asynchandeler = (fn) =>async(req,res,next)=>{
+const asynchandler = (fn) =>async(req,res,next)=>{
    try {
     fn(req,res,next)
    } catch (error) {
@@ -10,4 +10,4 @@ const asynchandeler = (fn) =>async(req,res,next)=>{
 }
 
 
-export default asynchandeler;
+export default asynchandler;

@@ -36,3 +36,35 @@ export const signup = asynchandler(async (req,res)=>{
         user
     })
 })
+export const login = asynchandler(async (req,res)=>{
+    const {email,password} = req.body
+    if(!email || !password){
+        throw new customerror('please fill all fields',400)
+    }
+    const User = user.findOne({email}).select("+password")
+    if(!User){
+        throw new customerror('invalid credentials',400)
+    }
+    const isPasswordMatched = await User.comparePassword(password)
+    if(isPasswordMatched){
+     const token = User.getjwtToken()
+     User.password= undefined
+    res.cookie("token",token,cookieOptions)
+    return res.status(200).json({
+        success : true,
+        token,
+        user
+    })
+    }
+    throw new customerror('invalid ',400)
+})
+export const logout = asynchandler(async(_req,res)=>{
+    res.cookie("token",null,{
+        expires : new Date(Date.now()),
+        httpOnly:true
+    })
+    res.status(200).json({
+        success:true,
+        message:"Logged Out"
+    })
+})
