@@ -3,14 +3,12 @@ import user from '../models/user.schema'
 import asynchandler from '../services/asynchandler';
 import customerror from '../utils/customerror';
 import mailHelper from '../utils/mailHelper';
+import crypto from 'crypto';
 
 export const cookieOptions = {
     expires:new Date(Date.now()+3*24*60*60*1000),
     httpOnly : true,
 }
-
-
-
 export const signup = asynchandler(async (req,res)=>{
     const {name,email,password} = req.body
     if(!name ||!email||!password){
@@ -42,7 +40,7 @@ export const login = asynchandler(async (req,res)=>{
     if(!email || !password){
         throw new customerror('please fill all fields',400)
     }
-    const User = user.findOne({email}).select("+password")
+    const User =  await user.findOne({email}).select("+password")
     if(!User){
         throw new customerror('invalid credentials',400)
     }
@@ -100,4 +98,36 @@ export const forgotPassword = asynchandler(async (req,res)=>{
     }
     
         }
-    );
+ )
+export const resetPassword = asynchandler(async (req,res)=>{
+    const{token : resetToken} = req.params
+    const{password,confirmPassword} = req.body
+    const resetPasswordToken = crypto
+    .createHash('sha26')
+    .update(resetToken)
+    .digest('hex')
+    const User = await user.findOne({
+        forgotPasswordToken:resetPasswordToken,
+        forgotPasswordExpiry:{$gt : Date.now()}
+    });
+    if(!user){
+        throw new customerror('password token is invalid ',400)
+    }
+    if(password!==confirmPassword){
+        throw new customerror('pass and confirm pass dont match',400)
+    }
+    User.password = password
+    User.forgotPasswordToken = undefined
+    User.forgotPasswordExpiry = undefined
+     await User.save()
+    const token = user.getjwtToken()
+    User.password = undefined
+    res.cookie("token",token,cookieOptions)
+    res.status(200).json({
+        success:true,
+        User
+    })
+
+
+
+})
