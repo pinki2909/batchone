@@ -63,3 +63,26 @@ export const addProduct = asynchandler(async(req,res)=>{
         }
     })
 })
+export const getAllProducts = asynchandler(async(req,res)=>{
+    const products = await Product.find({})
+          if(!products){
+            throw new customerror("product was not found",404)
+          }
+          res.status(200).json({
+            success:true,
+            products
+          })
+ }) 
+ export const getProductById = asynchandler(async(req,res)=>{
+    const {id:productId} = req.params
+    const product = await Product.findById({})
+          if(!product){
+            throw new customerror("product was not found",404)
+          }
+          res.status(200).json({
+            success:true,
+            product
+          })
+ })      
+
+
